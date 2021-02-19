@@ -1,10 +1,19 @@
-﻿import heapq
+import heapq
 import collections
 
 def Dijkstra(graph, sommet_depart):
     """
     Cette fonction renvoie la distance la plus courte d'un sommet de
     départ vers tous les autres sommets d'un graphe pondéré.
+    >>> Graph = {'A':{'B':1, 'C':2},
+        'B':{'A':1, 'D':2, 'F':3},
+        'C':{'A':2, 'D':3, 'E':4},
+        'D':{'B':2, 'C':3, 'E':2, 'F':3, 'G':3},
+        'E':{'C':4, 'D':2, 'G':5},
+        'F':{'B':3, 'D':3, 'G':4},
+        'G':{'D':3, 'E':5, 'F':4}}
+    >>> print(Dijkstra(Graph, 'G'))
+    OrderedDict([('A', 6), ('B', 5), ('C', 6), ('D', 3), ('E', 5), ('F', 4), ('G', 0)])
     """
     distances = {sommet: float('infinity') for sommet in graph}
     # La distance du sommet de départ à lui-même est évidemment 0
@@ -30,13 +39,3 @@ def Dijkstra(graph, sommet_depart):
     # Tri obtenu avec lambda, où la valeur 0 indique les clés
     distances = collections.OrderedDict(sorted(distances.items(), key=lambda t: t[0]))
     return distances
-
-Graph = {'A':{'B':1, 'C':2},
-        'B':{'A':1, 'D':2, 'F':3},
-        'C':{'A':2, 'D':3, 'E':4},
-        'D':{'B':2, 'C':3, 'E':2, 'F':3, 'G':3},
-        'E':{'C':4, 'D':2, 'G':5},
-        'F':{'B':3, 'D':3, 'G':4},
-        'G':{'D':3, 'E':5, 'F':4}}
-
-print(Dijkstra(Graph, 'G'))
