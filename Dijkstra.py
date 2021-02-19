@@ -26,6 +26,7 @@ def Dijkstra(graph, sommet_depart):
         # Permet de comparer plusieurs fois des distances pour un même sommet
         if distance_actuelle > distances[sommet_actuel]:
             continue
+
         # .items renvoie clés et valeurs du dictionnaire graph
         for voisin, poids in graph[sommet_actuel].items():
             plus_courte_distance = distance_actuelle + poids
