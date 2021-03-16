@@ -1,1 +1,2 @@
-15 Mars : dÈbut de rÈflexion du projet, constituant en l'Ècriture de bots Discord en Python, avec l'un Ècrit par moi et l'autre par Hugo MARTIN. Ceux-ci seront reliÈs d'une maniËre ou d'une autre.
+15 Mars : d√©but de r√©flexion du projet, constituant en l'√©criture de bots Discord en Python, avec l'un √©crit par moi et l'autre par Hugo MARTIN. Ceux-ci seront reli√©s d'une mani√®re ou d'une autre.
+Je pense plut√¥t m'orienter vers la cr√©ation d'un puzzle-game science-fictionesque (nomm√© Pyzzle).
