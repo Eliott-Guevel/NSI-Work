@@ -1,0 +1,87 @@
+#import random
+import pygame
+from pygame.locals import *
+
+# lancement de pygame
+pygame.init()
+
+# logo = pygame.image.load("monimage.png").convert()
+# pygame.display.set_icon(logo)
+pygame.display.set_caption("Project_Pyzzle")
+
+# gestion des constantes
+# définition des paramètres du screen principal
+width_screen = 800
+height_screen = 600
+
+# FPS du jeu
+framerate = 30
+
+# Quantité de pixels dont peut se déplacer le personnage principal
+movement_amount = 50
+
+#level_counter = 0
+
+# création de la fenêtre
+screen = pygame.display.set_mode((width_screen, height_screen))
+
+background = pygame.image.load("starset.png").convert_alpha()
+
+running = True
+
+# initialise la gestion du framerate
+clock_framerate = pygame.time.Clock()
+
+# permet d'obtenir une séquence de valeurs booléennes
+# représentant l'état de chaque touche du clavier
+keystate = pygame.key.get_pressed()
+
+# permet la répétition des touches du clavier (délai puis intervalle)
+pygame.key.set_repeat(100, 100)
+
+class Player:
+    """gère le personnage principal"""
+    def __init__(self, anim1, anim2):
+        super().__init__()
+        # sprites du personnage principal
+        self.anim1 = pygame.image.load(anim1).convert_alpha()
+        self.anim2 = pygame.image.load(anim2).convert_alpha()
+
+        self.x = 0
+        self.y = 0
+
+        # direction par défaut
+        self.default_anim = self.anim1
+
+    def change_state(self, state):
+        if state == "first":
+            self.default_anim = self.anim1
+        if state == "second":
+            self.default_anim = self.anim2
+
+# création de du personnage principal
+character = Player("dk_droite.png", "dk_gauche.png")
+
+# boucle principale
+while running:
+    for event in pygame.event.get():
+        # appuyer sur la croix ou sur escape quitte le jeu
+        if event.type == QUIT or event.type == KEYDOWN and event.key == K_ESCAPE:
+            running = False
+            pygame.quit()
+        # click sur la plupart des boutons d'une souris active cet évènement
+        elif event.type == pygame.MOUSEBUTTONDOWN:
+            character.change_state("first")
+        # relâchement d'un click de la plupart des boutons d'une souris
+        if event.type == pygame.MOUSEBUTTONUP:
+            character.change_state("second")
+
+    # met à jour l'horloge, permettant de savoir
+    # combien de millisecondes se sont écoulées depuis le dernier appel
+    clock_framerate.tick(framerate)
+    # applique le background sur le screen principal
+    screen.blit(background, (0, 0))
+    # character.direction affiche l'image dans la direction voulue, et blit = block image transfer
+    screen.blit(character.default_anim, (character.x, character.y))
+    # actualisation permanente du screen principal
+    pygame.display.flip()
