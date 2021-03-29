@@ -4,9 +4,13 @@ from pygame.locals import *
 
 # lancement de pygame
 pygame.init()
+# fréquence, taille, chaînes, buffer : valeurs par défaut
+# 44100, -16, 2, 512
+pygame.mixer.init()
 
 # logo = pygame.image.load("monimage.png").convert()
 # pygame.display.set_icon(logo)
+
 pygame.display.set_caption("Project_Pyzzle")
 
 # gestion des constantes
@@ -15,49 +19,66 @@ pygame.display.set_caption("Project_Pyzzle")
 width_screen = 960
 height_screen = 540
 
-# FPS du jeu
-framerate = 30
-
-# Quantité de pixels dont peut se déplacer le personnage principal
-movement_amount = 50
-
-# 3 niveaux pour l'instant, de plus en plus difficiles
-# dk rap, lace's theme, world's end valentine
-#level_counter = 0
+level_counter = 0
 
 # création de la fenêtre
 screen = pygame.display.set_mode((width_screen, height_screen))
 
 background = pygame.image.load("placeholder_background.png").convert_alpha()
 
-running = True
+# menu_music = pygame.mixer.music.load(".mp3")
+# victory_screen_music = pygame.mixer.music.load(".mp3")
+
+# absorb_sound = pygame.mixer.Sound("absorb.mp3")
 
 # initialise la gestion du framerate
+
+# attributs : nom, taille, gras et italique (booléens)
+principal_font = pygame.font.SysFont("Arial", 30)
+
 clock_framerate = pygame.time.Clock()
+
+running = True
 
 class Player:
     """gère le personnage principal"""
-    def __init__(self, anim1, anim2):
+    def __init__(self, red, blue):
         super().__init__()
         # sprites du personnage principal
-        self.anim1 = pygame.image.load(anim1).convert_alpha()
-        self.anim2 = pygame.image.load(anim2).convert_alpha()
+        self.red = pygame.image.load(red).convert_alpha()
+        self.blue = pygame.image.load(blue).convert_alpha()
 
         self.x = width_screen // 2 - 40
         self.y = height_screen // 2 - 40
 
-        # direction par défaut
-        self.default_anim = self.anim1
-        # état du personnage
-        #self.color = self.red
+        # état par défaut du personnage
+        self.default_state = self.red
 
     def change_state(self, state):
         if state == "red":
-            self.default_anim = self.anim1
+            self.default_state = self.red
         if state == "blue":
-            self.default_anim = self.anim2
+            self.default_state = self.blue
+
+    def absorb_projectile(self, state):
+        absorb_sound.play()
+
+def music_pass():
+    # * 1000 puisque temps en ms
+    time_passed = pygame.mixer.music.get_pos() * 1000
+
+def score():
+    pass
+
+def update_fps():
+    fps = str(int(clock_framerate.get_fps()))
+    # utilise le format RGBA (A = alpha, opacité couleur)
+    fps_text = principal_font.render(fps, True, pygame.Color("violet"))
+    return fps_text
 
 # création du personnage principal (40 * 40)
+# rouge : FF3C28
+# bleu : 0AB9E6
 character = Player("red_square.png", "blue_square.png")
 
 # boucle principale
@@ -67,6 +88,9 @@ while running:
         if event.type == QUIT or event.type == KEYDOWN and event.key == K_ESCAPE:
             running = False
             pygame.quit()
+            #pygame.mixer.Sound.stop()
+            pygame.mixer.stop()
+            pygame.mixer.quit()
         # click sur un bouton de la souris active cet évènement:
         elif event.type == pygame.MOUSEBUTTONDOWN:
             # left mouse button
@@ -76,12 +100,39 @@ while running:
             if event.button == 3:
                 character.change_state("blue")
 
-    # met à jour l'horloge, permettant de savoir
-    # combien de millisecondes se sont écoulées depuis le dernier appel
-    clock_framerate.tick(framerate)
+        # tutoriel
+        if level_counter == 0:
+            # plutôt format OGG ou WAV, apparemment
+            # 1:31, 92 BPM
+            tutorial_music = pygame.mixer.music.load("Sayonara Wild Heart.mp3")
+            # 2ème valeur indique (en s) le moment du morceau constituant le début de la diffusion
+            pygame.mixer.music.play(1, 0.0)
+
+        # easy
+        elif level_counter == 1:
+            # 1:53, 120 BPM
+            second_music = pygame.mixer.music.load("Crypt of the NecroDancer OST - King Conga Kappa (King Conga).mp3")
+            pygame.mixer.music.play(1, 0.0)
+
+        # medium
+        elif level_counter == 2:
+            # 2:29, 140 BPM
+            third_music = pygame.mixer.music.load("OMORI OST - 106 GOLDENVENGEANCE.mp3")
+            pygame.mixer.music.play(1, 0.0)
+
+        # hard
+        elif level_counter == 3:
+            # 3:07, 184 BPM
+            fourth_music = pygame.mixer.music.load("Bossfight - Milky Ways.mp3")
+            pygame.mixer.music.play(1, 0.0)
+
     # applique le background sur le screen principal
     screen.blit(background, (0, 0))
-    # character.direction affiche l'image dans la direction voulue, et blit = block image transfer
-    screen.blit(character.default_anim, (character.x, character.y))
+    # affiche le fps en haut à gauche de l'écran (x, y)
+    screen.blit(update_fps(), (5,0))
+    # character.default_state utilise l'état, et blit = block image transfer
+    screen.blit(character.default_state, (character.x, character.y))
+    # 60 fps maximum
+    clock_framerate.tick(60)
     # actualisation permanente du screen principal
     pygame.display.flip()
