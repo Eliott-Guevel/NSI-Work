@@ -24,7 +24,7 @@ level_counter = 0
 # création de la fenêtre
 screen = pygame.display.set_mode((width_screen, height_screen))
 
-background = pygame.image.load("placeholder_background.png").convert_alpha()
+background = pygame.image.load("background_with_tracks.png").convert_alpha()
 
 # menu_music = pygame.mixer.music.load(.mp3")
 # victory_screen_music = pygame.mixer.music.load("Final Fantasy VII - Victory Fanfare [HQ].mp3")
@@ -32,7 +32,7 @@ background = pygame.image.load("placeholder_background.png").convert_alpha()
 # click = pygame.mixer.Sound(".mp3")
 
 # attributs : nom, taille, gras et italique (booléens)
-principal_font = pygame.font.SysFont("Arial", 30)
+principal_font = pygame.font.SysFont("SMW", 40)
 
 # initialise la gestion du framerate
 clock_framerate = pygame.time.Clock()
@@ -41,32 +41,40 @@ running = True
 
 class Player:
     """gère le personnage principal"""
-    def __init__(self, red, blue):
+    def __init__(self, character_red, character_blue):
         super().__init__()
         # sprites du personnage principal
-        self.red = pygame.image.load(red).convert_alpha()
-        self.blue = pygame.image.load(blue).convert_alpha()
+        self.character_red = pygame.image.load(character_red).convert_alpha()
+        self.character_blue = pygame.image.load(character_blue).convert_alpha()
 
         self.x = width_screen // 2 - 40
         self.y = height_screen // 2 - 40
 
         # état par défaut du personnage
-        self.default_state = self.red
+        self.default_state = self.character_red
 
     def change_state(self, state):
         if state == "red":
-            self.default_state = self.red
+            self.default_state = self.character_red
         if state == "blue":
-            self.default_state = self.blue
+            self.default_state = self.character_blue
 
-    def absorb_projectile(self, state):
-        absorb_sound.play()
+    def absorb_note(self, state):
+        pass
+
+class Note:
+    """gère les notes arrivant"""
+    def __init__(self, red_note, blue_note):
+        # sprites des notes (ccouleurs en hexadécimal identiques au personnage principal)
+        self.red_note = pygame.image.load("red_note.png").convert_alpha()
+        self.blue_note = pygame.image.load("blue_note.png").convert_alpha()
 
 def music_pass():
     # * 1000 puisque temps en ms
     time_passed = pygame.mixer.music.get_pos() * 1000
 
 def score_stonks():
+    #score =
     pass
 
 def update_fps():
@@ -79,6 +87,8 @@ def update_fps():
 # rouge : FF3C28
 # bleu : 0AB9E6
 character = Player("red_square.png", "blue_square.png")
+
+note = Note("red_note.png", "blue_note.png")
 
 # boucle principale
 while running:
@@ -128,9 +138,13 @@ while running:
     # applique le background sur le screen principal
     screen.blit(background, (0, 0))
     # affiche le fps en haut à gauche de l'écran (x, y)
-    screen.blit(update_fps(), (5,0))
+    screen.blit(update_fps(), (5, 0))
     # character.default_state utilise l'état, et blit = block image transfer
     screen.blit(character.default_state, (character.x, character.y))
+
+    screen.blit(Note.red_note, (480, 235))
+    screen.blit(Note.blue_note, (5, 235))
+
     # 60 fps maximum
     clock_framerate.tick(60)
     # actualisation permanente du screen principal
