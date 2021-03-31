@@ -35,7 +35,8 @@ screen = pygame.display.set_mode((width_screen, height_screen))
 
 background = pygame.image.load("background_with_tracks.png").convert_alpha()
 
-# menu_music = pygame.mixer.music.load(Breakfast (Pause Menu) - Friday Night Funkin' OST.mp3")
+# menu_music = pygame.mixer.music.load(.mp3")
+# pause_screen_music = pygame.mixer.music.load(Breakfast (Pause Menu) - Friday Night Funkin' OST.mp3")
 # victory_screen_music = pygame.mixer.music.load("Final Fantasy VII - Victory Fanfare [HQ].mp3")
 
 # click = pygame.mixer.Sound(".mp3")
