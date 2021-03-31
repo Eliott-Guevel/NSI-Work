@@ -14,7 +14,9 @@ pygame.mixer.init()
 menu
 sound effect pour appuyer sur un bouton sur le menu
 gestion collisions
+au moins 4 niveaux
 pause screen
+combo des notes
 """
 
 # logo = pygame.image.load("monimage.png").convert()
