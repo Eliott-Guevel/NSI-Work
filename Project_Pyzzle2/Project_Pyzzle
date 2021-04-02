@@ -1,5 +1,7 @@
 import pygame
 from pygame.locals import *
+# py -m pip install mutagen
+from mutagen.mp3 import MP3
 
 # lancement de pygame
 pygame.init()
@@ -8,16 +10,38 @@ pygame.init()
 # 44100, -16, 2, 512
 pygame.mixer.init()
 
-"""
-à faire
+""" fichiers nécessaires
+librairie:
+mutagen
 
+sprites(.png):
+red_square
+blue_square
+red_note
+blue_note
+background_with_tracks
+
+musiques(.mp3):
+Breakfast (Pause Menu) - Friday Night Funkin' OST
+Final Fantasy VII - Victory Fanfare [HQ]
+Sayonara Wild Heart
+Crypt of the NecroDancer OST - King Conga Kappa (King Conga)
+OMORI OST - 106 GOLDENVENGEANCE
+Bossfight - Milky Ways
+
+font(.ttf):
+SMW
+"""
+
+""" à faire
 menu principal
-menu d'options (volume musique, taille notes
-sound effect pour appuyer sur un bouton sur le menu
+victory screen
+menu d'options (volume musique, taille notes)
+sound effects
 gestion collisions
 au moins 4 niveaux
 pause screen
-combo des notes (100 pts par note réussie, +50 pour combo commençant à 1, cappant à
+score : combo des notes (100 pts par note réussie, +50 pour combo commençant à 1, cappant à 200)
 """
 
 # logo = pygame.image.load("monimage.png").convert()
@@ -50,6 +74,32 @@ principal_font = pygame.font.SysFont("SMW", 40)
 # initialise la gestion du framerate
 clock_framerate = pygame.time.Clock()
 
+# tutoriel
+if level_counter == 0:
+    # plutôt format OGG ou WAV, apparemment
+    # 1:31, 92 BPM
+    music_setup = pygame.mixer.music.load("Sayonara Wild Heart.mp3")
+    music_name = "Sayonara Wild Heart.mp3"
+
+# easy
+elif level_counter == 1:
+    # 1:53, 120 BPM
+    music_setup = pygame.mixer.music.load("Crypt of the NecroDancer OST - King Conga Kappa (King Conga).mp3")
+
+        # medium
+elif level_counter == 2:
+    # 2:29, 140 BPM
+    music_setup = pygame.mixer.music.load("OMORI OST - 106 GOLDENVENGEANCE.mp3")
+
+# hard
+elif level_counter == 3:
+    # 3:07, 184 BPM
+    music_setup = pygame.mixer.music.load("Bossfight - Milky Ways.mp3")
+
+music = MP3(music_name)
+# ne joue qu'une seule fois la musique loadée
+pygame.mixer.music.play()
+
 running = True
 
 class Player:
@@ -78,13 +128,20 @@ class Player:
 class Note:
     """gère les notes arrivant"""
     def __init__(self, red_note, blue_note):
-        # sprites des notes (ccouleurs en hexadécimal identiques au personnage principal)
+        # sprites des notes (couleurs en hexadécimal identiques au personnage principal)
         self.red_note = pygame.image.load("red_note.png").convert_alpha()
         self.blue_note = pygame.image.load("blue_note.png").convert_alpha()
 
-def music_pass():
+def update_music_time_remaining():
     # * 1000 puisque temps en ms
-    time_passed = pygame.mixer.music.get_pos() * 1000
+    music_time_passed = str(pygame.mixer.music.get_pos() // 1000)
+    # utilise le format RGBA (A = alpha, opacité couleur)
+    music_time_remaining = principal_font.render(music_time_passed, True, pygame.Color("white"))
+    return music_time_remaining
+
+def music_time():
+    music_length = music.info.length
+    return music_length
 
 def score_stonks():
     #score =
@@ -92,7 +149,6 @@ def score_stonks():
 
 def update_fps():
     fps = str(int(clock_framerate.get_fps()))
-    # utilise le format RGBA (A = alpha, opacité couleur)
     fps_text = principal_font.render(fps, True, pygame.Color("violet"))
     return fps_text
 
@@ -122,43 +178,22 @@ while running:
             if event.button == 3:
                 character.change_state("blue")
 
-        # tutoriel
-        if level_counter == 0:
-            # plutôt format OGG ou WAV, apparemment
-            # 1:31, 92 BPM
-            tutorial_music = pygame.mixer.music.load("Sayonara Wild Heart.mp3")
-            # 2ème valeur indique (en s) le moment du morceau constituant le début de la diffusion
-            pygame.mixer.music.play()
-
-        # easy
-        elif level_counter == 1:
-            # 1:53, 120 BPM
-            second_music = pygame.mixer.music.load("Crypt of the NecroDancer OST - King Conga Kappa (King Conga).mp3")
-            pygame.mixer.music.play()
-
-        # medium
-        elif level_counter == 2:
-            # 2:29, 140 BPM
-            third_music = pygame.mixer.music.load("OMORI OST - 106 GOLDENVENGEANCE.mp3")
-            pygame.mixer.music.play()
-
-        # hard
-        elif level_counter == 3:
-            # 3:07, 184 BPM
-            fourth_music = pygame.mixer.music.load("Bossfight - Milky Ways.mp3")
-            pygame.mixer.music.play()
-
     # applique le background sur le screen principal
     screen.blit(background, (0, 0))
     # affiche le fps en haut à gauche de l'écran (x, y)
     screen.blit(update_fps(), (5, 0))
+    # affiche le temps restant de la musique en haut à droite de l'écran
+    screen.blit(music_time(), (820, 0))
+    screen.blit(update_music_time_remaining(), (800, 0))
     # character.default_state utilise l'état, et blit = block image transfer
     screen.blit(character.default_state, (character.x, character.y))
 
-    screen.blit(Note.red_note, (480, 235))
-    screen.blit(Note.blue_note, (5, 235))
+    #screen.blit(Note.red_note, (480, 235))
+    #screen.blit(Note.blue_note, (5, 235))
 
     # 60 fps maximum
     clock_framerate.tick(60)
     # actualisation permanente du screen principal
     pygame.display.flip()
+
+pygame.mixer.music.play()
