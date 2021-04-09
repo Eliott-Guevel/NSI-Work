@@ -1,10 +1,6 @@
 import pygame
 from pygame.locals import *
 
-# permet de changer les valeurs par défaut
-# fréquence : 44100 et buffer : 512
-#pygame.mixer.pre_init(44100,-16,2, 1024)
-""" fixer vitesse musique"""
 # lancement de pygame
 pygame.init()
 pygame.mixer.init()
@@ -24,8 +20,6 @@ Breakfast (Pause Menu) - Friday Night Funkin' OST
 Final Fantasy VII - Victory Fanfare
 Sayonara Wild Heart
 Crypt of the NecroDancer OST - King Conga Kappa (King Conga)
-OMORI OST - 106 GOLDENVENGEANCE
-Bossfight - Milky Ways
 
 font(.ttf):
 SMW
@@ -96,6 +90,7 @@ while continue_menu:
             quit()
         # 1er niveau
         if event.type == KEYDOWN:
+            # pour certains pc sous windows 10, appuyer sur fn + f(x)
             if event.key == K_F1:
                 continue_menu = False
                 level_counter = 0
@@ -129,16 +124,6 @@ elif level_counter == 1:
     # 1:53, 120 BPM
     music_setup = pygame.mixer.Sound("Crypt of the NecroDancer OST - Konga Conga Kappa (King Conga).ogg")
     music = pygame.mixer.music.load("Crypt of the NecroDancer OST - Konga Conga Kappa (King Conga).ogg")
-
-        # medium
-elif level_counter == 2:
-    # 2:29, 140 BPM
-    music = pygame.mixer.music.load("OMORI OST - 106 GOLDENVENGEANCE.ogg")
-
-# hard
-elif level_counter == 3:
-    # 3:07, 184 BPM
-    music = pygame.mixer.music.load("Bossfight - Milky Ways.ogg")
 
 # premet de jouer la musique du niveau sélectionné
 pygame.mixer.music.play()
