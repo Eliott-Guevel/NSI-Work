@@ -39,6 +39,8 @@ screen = pygame.display.set_mode((width_screen, height_screen))
 logo = pygame.image.load("red_note.png").convert_alpha()
 pygame.display.set_icon(logo)
 
+#pygame.mixer.music.set_volume(0)
+
 music = pygame.mixer.music.load("Louis XIV - God Killed the Queen INSTRUMENTAL.ogg")
 # -1 permet de jouer indéfiniment la musique
 pygame.mixer.music.play(-1)
@@ -155,7 +157,7 @@ class Game():
         self.difference = self.entire_music_time - self.music_elapsed
         #print(self.entire_music_time)
         #print(self.music_elapsed)
-        #print(self.difference)
+        print(self.difference)
 
     def tutorial(self):
         # level design
