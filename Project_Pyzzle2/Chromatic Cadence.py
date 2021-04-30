@@ -39,7 +39,7 @@ screen = pygame.display.set_mode((width_screen, height_screen))
 logo = pygame.image.load("red_note.png").convert_alpha()
 pygame.display.set_icon(logo)
 
-#pygame.mixer.music.set_volume(0)
+pygame.mixer.music.set_volume(0)
 
 music = pygame.mixer.music.load("Louis XIV - God Killed the Queen INSTRUMENTAL.ogg")
 # -1 permet de jouer indéfiniment la musique
@@ -78,6 +78,8 @@ class Player(pygame.sprite.Sprite):
             # sprites du personnage principal
             self.red_character = pygame.image.load(red_character).convert_alpha()
             self.blue_character = pygame.image.load(blue_character).convert_alpha()
+            self.control_scheme_buttons = principal_font.render("Mouse Buttons", True, pygame.Color("red"))
+            self.control_scheme_wheel = principal_font.render("Scroll Wheel", True, pygame.Color("red"))
 
             # état par défaut du personnage
             self.image = self.red_character
@@ -90,15 +92,32 @@ class Player(pygame.sprite.Sprite):
             self.rect.y = 230
 
         def change_state(self):
-            if event.type == pygame.MOUSEBUTTONDOWN:
-                # left mouse button
-                if event.button == 1:
-                    self.image = self.red_character
-                    self.player_color = "red"
-                # right mouse button
-                if event.button == 3:
-                    self.image = self.blue_character
-                    self.player_color = "blue"
+            # toutes les 5 secondes (01234), le control scheme change (mouse buttons -> scroll wheel)
+            if int(game.other_difference % 10) < 5:
+                # permet de connaître le control scheme utilisé
+                screen.blit(self.control_scheme_buttons, (600, 0))
+                if event.type == pygame.MOUSEBUTTONDOWN:
+                    # left mouse button
+                    if event.button == 1:
+                        self.image = self.red_character
+                        self.player_color = "red"
+                    # right mouse button
+                    if event.button == 3:
+                        self.image = self.blue_character
+                        self.player_color = "blue"
+            # 56789
+            else:
+                screen.blit(self.control_scheme_wheel, (600, 0))
+                # nécessite les 2
+                if event.type == pygame.MOUSEBUTTONUP:
+                    # scroll wheel up
+                    if event.button == 4:
+                        self.image = self.red_character
+                        self.player_color = "red"
+                    # scroll wheel down
+                    if event.button == 5:
+                        self.image = self.blue_character
+                        self.player_color = "blue"
 
 class Game():
     def __init__(self):
@@ -155,6 +174,8 @@ class Game():
         # en ms
         self.music_elapsed = round(pygame.mixer.music.get_pos() / 1000, 2)
         self.difference = self.entire_music_time - self.music_elapsed
+        # pour avoir 100, car % 10 utilisé plus tard
+        self.other_difference = self.difference + 2
         #print(self.entire_music_time)
         #print(self.music_elapsed)
         print(self.difference)
@@ -392,8 +413,9 @@ while running:
         game.time()
         if level_counter == 0:
             game.tutorial()
-        game.update(screen)
         game.player.change_state()
+        game.update(screen)
+        #game.player.change_state()
         # affiche le fps en haut à gauche de l'écran (x, y)
         screen.blit(update_fps(), (400, 0))
         # affiche le temps restant de la musique en haut à droite de l'écran
