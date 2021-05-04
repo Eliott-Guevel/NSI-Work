@@ -25,16 +25,11 @@ SMW """
 
 pygame.display.set_caption("Chromatic Cadence")
 
-# gestion des constantes
-# 1920 / 2
-width_screen = 960
-# 1080 / 2
-height_screen = 540
 # attributs : nom, taille, gras et italique (booléens)
 principal_font = pygame.font.SysFont("SMW", 40)
 
-# création de la fenêtre
-screen = pygame.display.set_mode((width_screen, height_screen))
+# création de la fenêtre (1920 / 2 et 1080 / 2)
+screen = pygame.display.set_mode((960, 540))
 
 logo = pygame.image.load("red_note.png").convert_alpha()
 pygame.display.set_icon(logo)
@@ -79,21 +74,23 @@ class Player(pygame.sprite.Sprite):
             self.red_character = pygame.image.load(red_character).convert_alpha()
             self.blue_character = pygame.image.load(blue_character).convert_alpha()
             self.control_scheme_buttons = principal_font.render("Mouse Buttons", True, pygame.Color("red"))
+            self.control_scheme_buttons_alternative = principal_font.render("Incoming Mouse Buttons", True, pygame.Color("green"))
             self.control_scheme_wheel = principal_font.render("Scroll Wheel", True, pygame.Color("red"))
+            self.control_scheme_wheel_alternative = principal_font.render("Incoming Scroll Wheel", True, pygame.Color("green"))
 
             # état par défaut du personnage
             self.image = self.red_character
             self.player_color = "red"
 
             self.rect = self.red_character.get_rect()
-            # width_screen // 2 - 40
+            # 960 // 2 - 40
             self.rect.x = 440
-            # height_screen // 2 - 40
+            # 540 // 2 - 40
             self.rect.y = 230
 
         def change_state(self):
             # toutes les 5 secondes (01234), le control scheme change (mouse buttons -> scroll wheel)
-            if int(game.other_difference % 10) < 5:
+            if int(game.other_difference) % 10 < 5 and int(game.other_difference) % 10 != 4:
                 # permet de connaître le control scheme utilisé
                 screen.blit(self.control_scheme_buttons, (600, 0))
                 if event.type == pygame.MOUSEBUTTONDOWN:
@@ -105,10 +102,11 @@ class Player(pygame.sprite.Sprite):
                     if event.button == 3:
                         self.image = self.blue_character
                         self.player_color = "blue"
-            # 56789
-            else:
-                screen.blit(self.control_scheme_wheel, (600, 0))
-                # nécessite les 2
+
+            # annonce le changement de control scheme 1s avant
+            # conserve donc le control scheme placé au-dessus
+            if int(game.other_difference) % 10 == 4:
+                screen.blit(self.control_scheme_buttons_alternative, (600, 0))
                 if event.type == pygame.MOUSEBUTTONUP:
                     # scroll wheel up
                     if event.button == 4:
@@ -116,6 +114,32 @@ class Player(pygame.sprite.Sprite):
                         self.player_color = "red"
                     # scroll wheel down
                     if event.button == 5:
+                        self.image = self.blue_character
+                        self.player_color = "blue"
+
+            # 56789
+            if int(game.other_difference) % 10 >= 5 and int(game.other_difference) % 10 != 9:
+                screen.blit(self.control_scheme_wheel, (600, 0))
+                if event.type == pygame.MOUSEBUTTONUP:
+                    # scroll wheel up
+                    if event.button == 4:
+                        self.image = self.red_character
+                        self.player_color = "red"
+                    # scroll wheel down
+                    if event.button == 5:
+                        self.image = self.blue_character
+                        self.player_color = "blue"
+
+            # permet de savoir 1s avant que le control scheme change
+            if int(game.other_difference) % 10 == 9:
+                screen.blit(self.control_scheme_wheel_alternative, (600, 0))
+                if event.type == pygame.MOUSEBUTTONDOWN:
+                    # left mouse button
+                    if event.button == 1:
+                        self.image = self.red_character
+                        self.player_color = "red"
+                    # right mouse button
+                    if event.button == 3:
                         self.image = self.blue_character
                         self.player_color = "blue"
 
@@ -129,44 +153,55 @@ class Game():
         self.player = Player(self, "red_character.png", "blue_character.png")
         self.all_players.add(self.player)
         self.all_notes = pygame.sprite.Group()
-        self.counter = 0
+        self.hit_counter = 0
+        self.note_counter = 0
         self.time_elapsed = 0
         self.time_elapsed_2 = 0
         self.difference = 0
         self.other_combo = 0
         self.other_score = 0
+        self.max_score = 0
+        self.victory_letter = 0
 
-    def spawn_red_right_note(self):
-        red_right_note = Note(self, "red_note.png", "right")
+    def spawn_red_right_note(self, velocity):
+        red_right_note = Note(self, "red_note.png", "right", velocity)
         self.all_notes.add(red_right_note)
+        self.note_counter += 1
 
-    def spawn_blue_right_note(self):
-        blue_right_note = Note(self, "blue_note.png", "right")
+    def spawn_blue_right_note(self, velocity):
+        blue_right_note = Note(self, "blue_note.png", "right", velocity)
         self.all_notes.add(blue_right_note)
+        self.note_counter += 1
 
-    def spawn_red_left_note(self):
-        red_left_note = Note(self, "red_note.png", "left")
+    def spawn_red_left_note(self, velocity):
+        red_left_note = Note(self, "red_note.png", "left", velocity)
         self.all_notes.add(red_left_note)
+        self.note_counter += 1
 
-    def spawn_blue_left_note(self):
-        blue_left_note = Note(self, "blue_note.png", "left")
+    def spawn_blue_left_note(self, velocity):
+        blue_left_note = Note(self, "blue_note.png", "left", velocity)
         self.all_notes.add(blue_left_note)
+        self.note_counter += 1
 
-    def spawn_red_up_note(self):
-        red_up_note = Note(self, "red_note.png", "up")
+    def spawn_red_up_note(self, velocity):
+        red_up_note = Note(self, "red_note.png", "up", velocity)
         self.all_notes.add(red_up_note)
+        self.note_counter += 1
 
-    def spawn_blue_up_note(self):
-        blue_up_note = Note(self, "blue_note.png", "up")
+    def spawn_blue_up_note(self, velocity):
+        blue_up_note = Note(self, "blue_note.png", "up", velocity)
         self.all_notes.add(blue_up_note)
+        self.note_counter += 1
 
-    def spawn_red_down_note(self):
-        red_down_note = Note(self, "red_note.png", "down")
+    def spawn_red_down_note(self, velocity):
+        red_down_note = Note(self, "red_note.png", "down", velocity)
         self.all_notes.add(red_down_note)
+        self.note_counter += 1
 
-    def spawn_blue_down_note(self):
-        blue_down_note = Note(self, "blue_note.png", "down")
+    def spawn_blue_down_note(self, velocity):
+        blue_down_note = Note(self, "blue_note.png", "down", velocity)
         self.all_notes.add(blue_down_note)
+        self.note_counter += 1
 
     def time(self):
         # en s, et musique n'est pas égale exactement à 98s donc int()
@@ -176,39 +211,37 @@ class Game():
         self.difference = self.entire_music_time - self.music_elapsed
         # pour avoir 100, car % 10 utilisé plus tard
         self.other_difference = self.difference + 2
-        #print(self.entire_music_time)
-        #print(self.music_elapsed)
-        print(self.difference)
+        #print(self.difference)
 
     def tutorial(self):
         # level design
-        self.counter += 1
-        if self.counter < 2:
-            self.spawn_red_right_note()
+        # normalement, left and right velocity = 4 et up and down velocity = 2, mais changeable
+        if self.difference == 98 or self.difference == 97.99:
+            self.spawn_red_right_note(4)
         # décompte, puisqu'on part de la longueur de la musique
         if self.difference == 97 or self.difference == 97.01:
-            self.spawn_blue_right_note()
+            self.spawn_blue_right_note(4)
         if self.difference == 96 or self.difference == 96.01:
-            self.spawn_red_left_note()
+            self.spawn_red_left_note(4)
         if self.difference == 95 or self.difference == 95.01:
-            self.spawn_blue_left_note()
+            self.spawn_blue_left_note(4)
         if self.difference == 94 or self.difference == 94.01:
-            self.spawn_red_right_note()
+            self.spawn_red_right_note(4)
         if self.difference == 93 or self.difference == 93.01:
-            self.spawn_blue_left_note()
+            self.spawn_blue_left_note(4)
         if self.difference == 92 or self.difference == 92.01:
-            self.spawn_red_left_note()
-            self.spawn_red_right_note()
+            self.spawn_red_left_note(4)
+            self.spawn_red_right_note(4)
         if self.difference == 91 or self.difference == 91.01:
-            self.spawn_blue_up_note()
+            self.spawn_blue_up_note(2)
         if self.difference == 90 or self.difference == 90.01:
-            self.spawn_red_down_note()
+            self.spawn_red_down_note(2)
         if self.difference == 88 or self.difference == 88.01:
-            self.spawn_blue_right_note()
-            self.spawn_blue_up_note()
+            self.spawn_blue_right_note(4)
+            self.spawn_blue_up_note(2)
         if self.difference == 87 or self.difference == 87.01:
-            self.spawn_red_left_note()
-            self.spawn_red_down_note()
+            self.spawn_red_left_note(4)
+            self.spawn_red_down_note(2)
 
     def check_collision(self, sprite, Group):
         return pygame.sprite.spritecollide(sprite, Group, False, pygame.sprite.collide_mask)
@@ -239,16 +272,54 @@ class Game():
         self.score_text = principal_font.render(self.score, True, pygame.Color("orange"))
         return self.score_text
 
+    # total notes
+    def note_counter_increase(self):
+        self.other_note_counter_text = str(self.note_counter)
+        self.note_counter_text = principal_font.render(self.other_note_counter_text, True, pygame.Color("yellow"))
+        return self.note_counter_text
+
+    # notes absorbées
+    def hit_counter_increase(self):
+        self.other_hit_counter_text = str(self.hit_counter)
+        self.hit_counter_text = principal_font.render(self.other_hit_counter_text, True, pygame.Color("yellow"))
+        return self.hit_counter_text
+
+    def maximum_score(self):
+        # score maximal pour ce niveau, montré lors du victory screen (sans jank)
+        # part de 3 de combo, donc - 5 pour rétablir le score réélement maximal
+        self.max_score = int(self.note_counter * 3 - 5)
+        self.other_max_score = str(self.max_score)
+        self.max_score_text = principal_font.render(self.other_max_score, True, pygame.Color("yellow"))
+        return self.max_score_text
+
+    def victory_screen_letter(self):
+        # <= 20 % du score maximal du niveau
+        if self.other_score <= 0.2 * self.max_score:
+            self.victory_letter = "E"
+        if self.other_score > 0.2 * self.max_score and self.score <= 0.4 * self.max_score:
+            self.victory_letter = "D"
+        if self.other_score > 0.4 * self.max_score and self.score <= 0.6 * self.max_score:
+            self.victory_letter = "C"
+        if self.other_score > 0.6 * self.max_score and self.score <= 0.8 * self.max_score:
+            self.victory_letter = "B"
+        if self.other_score > 0.8 * self.max_score and self.score <= 0.95 * self.max_score:
+            self.victory_letter = "A"
+        if self.other_score > 0.95 * self.max_score:
+            self.victory_letter = "S"
+        self.victory_letter_text = principal_font.render(self.victory_letter, True, pygame.Color("white"))
+        return self.victory_letter_text
+
 game = Game()
 
 # création notes (espace total : 33 * 33, mais non espace totalement utilisé)
 class Note(pygame.sprite.Sprite):
-    def __init__(self, game, note, direction):
+    def __init__(self, game, note, direction, velocity):
         super().__init__()
         self.game = game
         self.player = Player
         self.note_color = ""
         self.direction = ""
+        self.velocity = velocity
         self.image = pygame.image.load(note)
         # if self.image ne fonctionne pas
         if note == "red_note.png":
@@ -256,8 +327,6 @@ class Note(pygame.sprite.Sprite):
         if note == "blue_note.png":
             self.note_color = "blue"
         self.rect = self.image.get_rect()
-        self.velocity = 4
-        self.slower_velocity = 2
         self.direction = direction
         if self.direction == "right":
             self.rect.x = 960
@@ -276,6 +345,7 @@ class Note(pygame.sprite.Sprite):
         #print(self.note_color)
         if self.game.check_collision(self, self.game.all_players):
             if self.game.player.player_color == self.note_color:
+                game.hit_counter += 1
                 # soit un multiplicateur de score maxé à 3
                 if game.other_combo < 3:
                     game.other_combo += 1
@@ -303,14 +373,14 @@ class Note(pygame.sprite.Sprite):
     def forward_up(self):
         if self.direction == "up":
             if not self.game.check_collision(self, self.game.all_players):
-                self.rect.y += self.slower_velocity
+                self.rect.y += self.velocity
             else:
                 self.forward()
 
     def forward_down(self):
         if self.direction == "down":
             if not self.game.check_collision(self, self.game.all_players):
-                self.rect.y -= self.slower_velocity
+                self.rect.y -= self.velocity
             else:
                 self.forward()
 
@@ -331,8 +401,6 @@ while continue_menu:
                 # 1:31, 92 BPM
                 music_setup = pygame.mixer.Sound("Sayonara Wild Heart.ogg")
                 music = pygame.mixer.music.load("Sayonara Wild Heart.ogg")
-                # score maximal pour ce niveau, montré lors du victory screen
-                max_score = 100
 
     screen.blit(background, (0,0))
     screen.blit(update_fps(), (400, 0))
@@ -345,38 +413,13 @@ background = pygame.image.load("background_with_tracks.png").convert_alpha()
 
 pause_text = principal_font.render("Pause", True, pygame.color.Color("red"))
 
-def maximum_score():
-    # permet d'obtenir le bon format pour pouvoir blit
-    other_max_score = str(max_score)
-    max_score_text = principal_font.render(other_max_score, True, pygame.Color("yellow"))
-    return max_score_text
-
-victory_letter = ""
-
-def victory_screen_letter():
-    # <= 20 % du score maximal du niveau
-    if game.other_score <= 0.2 * max_score:
-        victory_letter = "E"
-    if game.other_score > 0.2 * max_score and game.score <= 0.4 * max_score:
-        victory_letter = "D"
-    if game.other_score > 0.4 * max_score and game.score <= 0.6 * max_score:
-        victory_letter = "C"
-    if game.other_score > 0.6 * max_score and game.score <= 0.8 * max_score:
-        victory_letter = "B"
-    if game.other_score > 0.8 * max_score and game.score <= 0.95 * max_score:
-        victory_letter = "A"
-    if game.other_score > 0.95 * max_score:
-        victory_letter = "S"
-    victory_letter_text = principal_font.render(victory_letter, True, pygame.Color("white"))
-    return victory_letter_text
-
 # permet de jouer la musique du niveau sélectionné
 pygame.mixer.music.play()
 
 pause_canal = pygame.mixer.Channel(0)
 
 # permet de savoir quand la musique est finie
-music_end = pygame.USEREVENT + 2
+music_end = pygame.USEREVENT + 1
 pygame.mixer.music.set_endevent(music_end)
 
 running = True
@@ -418,13 +461,16 @@ while running:
         #game.player.change_state()
         # affiche le fps en haut à gauche de l'écran (x, y)
         screen.blit(update_fps(), (400, 0))
+        # affiche le temps écoulé de la musique
+        screen.blit(update_music_time_remaining(), (490, 0))
         # affiche le temps restant de la musique en haut à droite de l'écran
         screen.blit(music_time(), (550, 0))
-        screen.blit(update_music_time_remaining(), (490, 0))
         # affiche le combo
         screen.blit(game.combo_increase(), (125, 0))
         # affiche le score
         screen.blit(game.score_increase(), (225, 0))
+        screen.blit(game.hit_counter_increase(), (490, 500))
+        screen.blit(game.note_counter_increase(), (550, 500))
 
         pygame.mixer.music.unpause()
         pause_canal.pause()
@@ -455,9 +501,11 @@ while victory_screen:
     screen.blit(background, (0,0))
     screen.blit(game.combo_increase(), (125, 0))
     screen.blit(game.score_increase(), (225, 0))
-    screen.blit(maximum_score(), (300,0))
-    screen.blit(victory_screen_letter(), (650, 270))
+    screen.blit(game.maximum_score(), (300, 0))
+    screen.blit(game.victory_screen_letter(), (650, 270))
     screen.blit(update_fps(), (400, 0))
+    screen.blit(game.hit_counter_increase(), (460, 300))
+    screen.blit(game.note_counter_increase(), (520, 300))
     # affiche ce texte au milieu, puisque y = 540 / 2 = 270
     screen.blit(victory_screen_text, (300, 270))
 
