@@ -215,10 +215,10 @@ class Game():
 
     def tutorial(self):
         # level design
+        # décompte, puisqu'on part de la longueur de la musique
         # normalement, left and right velocity = 4 et up and down velocity = 2, mais changeable
         if self.difference == 98 or self.difference == 97.99:
             self.spawn_red_right_note(4)
-        # décompte, puisqu'on part de la longueur de la musique
         if self.difference == 97 or self.difference == 97.01:
             self.spawn_blue_right_note(4)
         if self.difference == 96 or self.difference == 96.01:
@@ -286,7 +286,7 @@ class Game():
 
     def maximum_score(self):
         # score maximal pour ce niveau, montré lors du victory screen (sans jank)
-        # part de 3 de combo, donc - 5 pour rétablir le score réélement maximal
+        # part de 3 de combo, donc - 5 pour rétablir le score réellement maximal
         self.max_score = int(self.note_counter * 3 - 5)
         self.other_max_score = str(self.max_score)
         self.max_score_text = principal_font.render(self.other_max_score, True, pygame.Color("yellow"))
@@ -321,7 +321,7 @@ class Note(pygame.sprite.Sprite):
         self.direction = ""
         self.velocity = velocity
         self.image = pygame.image.load(note)
-        # if self.image ne fonctionne pas
+        # (if self.image) ne fonctionne pas
         if note == "red_note.png":
             self.note_color = "red"
         if note == "blue_note.png":
@@ -342,7 +342,6 @@ class Note(pygame.sprite.Sprite):
             self.rect.y = 550
 
     def forward(self):
-        #print(self.note_color)
         if self.game.check_collision(self, self.game.all_players):
             if self.game.player.player_color == self.note_color:
                 game.hit_counter += 1
@@ -394,7 +393,7 @@ while continue_menu:
             quit()
         # 1er niveau
         if event.type == pygame.KEYDOWN:
-            # pour certains pc sous windows 10, appuyer sur fn + f(x)
+            # pour certains PC (sous Windows 10), appuyer sur fn + f(x)
             if event.key == pygame.K_F1:
                 continue_menu = False
                 level_counter = 0
@@ -413,7 +412,7 @@ background = pygame.image.load("background_with_tracks.png").convert_alpha()
 
 pause_text = principal_font.render("Pause", True, pygame.color.Color("red"))
 
-# permet de jouer la musique du niveau sélectionné
+# permet de jouer la musique du niveau sélectionné (une seule fois)
 pygame.mixer.music.play()
 
 pause_canal = pygame.mixer.Channel(0)
@@ -458,7 +457,6 @@ while running:
             game.tutorial()
         game.player.change_state()
         game.update(screen)
-        #game.player.change_state()
         # affiche le fps en haut à gauche de l'écran (x, y)
         screen.blit(update_fps(), (400, 0))
         # affiche le temps écoulé de la musique
